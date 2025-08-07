@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Credit Journey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* ==== Fade & Visibility Utilities ==== */
+    .fade { transition: opacity 0.4s ease; }
+    .hidden { opacity: 0; pointer-events: none; }
+    .visible { opacity: 1; pointer-events: auto; }
+
+    /* ==== Reset & Base ==== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { font-family: "Segoe UI", Roboto, sans-serif; color: #333; background: #fff; height: 100%; }
+
+    /* ==== Page Container ==== */
+    .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; }
+
+    /* ==== Header ==== */
+    .header {
+      background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
+      padding: 80px 20px;
+      text-align: center;
+      color: #fff;
+      position: relative;
+    }
+    .header-label {
+      position: absolute; top: 20px; left: 20px; font-size: 0.9rem; opacity: 0.8;
+    }
+    .main-title { font-size: 3rem; margin: 0; }
+
+    /* ==== Content ==== */
+    .content { max-width: 700px; margin: 30px auto; padding: 0 20px; line-height: 1.6; }
+
+    /* ==== Score Box ==== */
+    .score-box { text-align: center; margin-bottom: 40px; }
+    .score-box .label { font-size: 1.2rem; color: #666; margin-bottom: 8px; }
+    .score-box .score { font-size: 3.2rem; font-weight: bold; color: #1e8e3e; margin-bottom: 4px; }
+    .score-box .delta { font-size: 1.1rem; color: #1e8e3e; }
+
+    /* ==== Detail Boxes ==== */
+    .details-box {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 30px;
+    }
+    .details-box h3 { font-size: 1.2rem; margin-bottom: 16px; color: #333; }
+
+    /* ==== Recent Activity ==== */
+    .activity-list { list-style: none; }
+    .activity-list li { margin-bottom: 12px; font-size: 1rem; }
+    .highlight-green { color: #1e8e3e; font-weight: bold; }
+    .highlight-red   { color: #d93025; font-weight: bold; }
+
+    /* ==== Balances & Stats ==== */
+    .balances p,
+    .stats p { margin-bottom: 12px; font-size: 1rem; }
+    .balances p strong,
+    .stats p strong { font-weight: bold; color: #000; }
+
+    /* ==== View Report Button ==== */
+    .btn-report {
+      display: block; width: 100%;
+      font-size: 1.1rem; font-weight: 500;
+      padding: 14px 20px; margin: 30px 0;
+      border: none; border-radius: 8px;
+      background: linear-gradient(90deg, #0c2a4e, #123b61);
+      color: #fff; text-align: center; cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-report:hover {
+      background: linear-gradient(90deg, #0a2340, #0f2f4d);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+
+    /* ==== Overlay & Modal ==== */
+    .overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .overlay.visible { opacity: 1; pointer-events: auto; }
+    .modal {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(0.9);
+      width: 80%; max-width: 600px; max-height: 80%; overflow-y: auto;
+      background: #fff; border-radius: 8px; padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .modal.visible {
+      opacity: 1; pointer-events: auto;
+      transform: translate(-50%,-50%) scale(1);
+    }
+    .modal h2 { margin-bottom: 16px; font-size: 1.4rem; }
+    .modal .close-btn {
+      position: absolute; top: 12px; right: 12px;
+      font-size: 1.4rem; background: none; border: none; cursor: pointer; color: #666;
+    }
+
+    /* ==== Accordion Buttons ==== */
+    .accordion-item { margin-bottom: 12px; }
+    .accordion-btn {
+      width: 100%; padding: 12px 16px;
+      font-size: 1rem; font-weight: bold;
+      color: #000; background: #fff;
+      border: 1px solid #c6c6c6; border-radius: 4px;
+      text-align: left; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .accordion-btn:hover {
+      background: #f5f5f5; border-color: #999;
+    }
+
+    /* ==== Accordion Panels ==== */
+    .accordion-panel {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 16px;
+    }
+    .accordion-item.open .accordion-panel {
+      max-height: 1000px; padding: 12px 16px 16px;
+    }
+    .accordion-panel h4 {
+      font-size: 1.1rem; color: #1A73E8;
+      margin-bottom: 8px; font-weight: bold;
+    }
+    .accordion-panel p {
+      margin-bottom: 8px; color: #202124;
+    }
+    .accordion-panel a {
+      display: block; margin-bottom: 8px;
+      color: #1A73E8; text-decoration: none;
+    }
+
+    .closed-entry { margin-bottom: 16px; }
+    .closed-entry .bnpl-label {
+      color: #1A73E8; font-weight: bold; font-size: 0.95rem;
+    }
+    .closed-entry .bnpl-code {
+      color: #5F6368; font-weight: bold; font-size: 0.9rem; margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="login-screen" class="fade visible" style="
+      position:absolute; top:0; left:0; width:100%; height:100%;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,#2C3E50 0%,#4CA1AF 100%);">
+    <div style="
+        background:rgba(255,255,255,0.1); padding:40px; border-radius:12px;
+        width:90%; max-width:360px; text-align:center;
+        box-shadow:0 8px 24px rgba(0,0,0,0.3); color:#fff;">
+      <h2 style="margin-bottom:24px; font-weight:300; font-size:1.8rem;">
+        Login
+      </h2>
+      <div id="login-error" style="
+          height:1.2em; margin-bottom:12px; color:#ff5e5e;
+          opacity:0; transition:opacity 0.3s; font-size:0.9rem;">
+        Invalid credentials
+      </div>
+      <div style="position:relative; margin-bottom:20px;">
+        <!-- user icon SVG -->
+        <svg viewBox="0 0 24 24" style="
+            position:absolute; top:50%; left:12px; transform:translateY(-50%);
+            width:20px; height:20px; fill:rgba(255,255,255,0.8);">
+          <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5
+                   2.3-5 5 2.3 5 5 5zm0 2c-3.3 
+                   0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+        </svg>
+        <input id="username" type="text" placeholder="Username" style="
+            width:100%; padding:12px 12px 12px 44px; border:none;
+            border-radius:6px; background:rgba(255,255,255,0.2);
+            color:#fff; font-size:1rem;" />
+      </div>
+      <div style="position:relative; margin-bottom:20px;">
+        <!-- lock icon SVG -->
+        <svg viewBox="0 0 24 24" style="
+            position:absolute; top:50%; left:12px; transform:translateY(-50%);
+            width:20px; height:20px; fill:rgba(255,255,255,0.8);">
+          <path d="M17 8V6c0-2.8-2.2-5-5-5S7
+                   3.2 7 6v2H5v14h14V8h-2zm-8
+                   0V6c0-1.7 1.3-3 3-3s3 1.3
+                   3 3v2H9z"/>
+        </svg>
+        <input id="password" type="password" placeholder="Password" style="
+            width:100%; padding:12px 12px 12px 44px; border:none;
+            border-radius:6px; background:rgba(255,255,255,0.2);
+            color:#fff; font-size:1rem;" />
+      </div>
+      <button id="login-btn" style="
+          width:100%; padding:12px; background:#1e8e3e; border:none;
+          border-radius:6px; color:#fff; font-size:1.1rem;
+          font-weight:500; cursor:pointer; transition:background 0.2s;">
+        Log In
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD WRAPPER ===== -->
+  <div id="dashboard" class="fade hidden">
+
+    <!-- ===== CREDIT JOURNEY PAGE ===== -->
+    <div class="page active">
+      <div class="header">
+        <div class="header-label">Chase Account</div>
+        <h1 class="main-title">Credit Journey</h1>
+      </div>
+      <div class="content">
+        <!-- Score -->
+        <div class="score-box">
+          <div class="label">Your credit score</div>
+          <div class="score">746</div>
+          <div class="delta">(+12p)</div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="details-box">
+          <h3>Recent Credit Activity</h3>
+          <ul class="activity-list">
+            <li><span class="highlight-green">+12pts</span> – 08/05/2025</li>
+            <li><span class="highlight-green">+2pts</span> – 07/22/2025</li>
+            <li><span class="highlight-red">-5pts</span> – 06/25/2025</li>
+            <li><span class="highlight-red">-2pts</span> – 06/08/2025</li>
+          </ul>
+        </div>
+
+        <!-- Balances -->
+        <div class="details-box balances">
+          <h3>Total balances</h3>
+          <p>Total credit card balances: <strong>$0.00</strong></p>
+          <p>Total loan balances: <strong>$12.46</strong></p>
+          <p><strong>Total debt: $12.46</strong></p>
+        </div>
+
+        <!-- Additional Stats -->
+        <div class="details-box stats">
+          <p>Late payments: <strong>1</strong> – Good!</p>
+          <p>Oldest account: <strong>120d</strong> – Great!</p>
+          <p>Credit checks: <strong>3</strong> – Great!</p>
+          <p>Available credit: <strong>$1,287.54 / $1,300</strong></p>
+        </div>
+
+        <!-- Report Button -->
+        <button id="open-report" class="btn-report">View Credit Report</button>
+      </div>
+    </div>
+
+  </div>
+  <!-- /#dashboard -->
+
+  <!-- Modal & Overlay -->
+  <div id="overlay" class="overlay"></div>
+  <div id="report-modal" class="modal">
+    <button id="close-report" class="close-btn">×</button>
+    <h2>Credit Report (as of Aug 06, 2025)</h2>
+
+    <div class="accordion-item">
+      <button class="accordion-btn">2 open accounts</button>
+      <div class="accordion-panel">
+        <h4>Revolving accounts</h4>
+        <p>Total balances: <strong>$12.46</strong></p>
+        <p>Total credit: <strong>$637.54</strong></p>
+        <div>
+  <strong>CREDIT CARD - ****7295</strong> – $12.46 – Opened on Apr 7, 2025
+</div>
+        <div>
+  <strong>CREDIT CARD - ****8126</strong> – $0.00 – Opened on Apr 13, 2025
+</div>
+
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-btn">0 installment accounts</button>
+      <div class="accordion-panel">
+        <p>No installment accounts.</p>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+  <button class="accordion-btn">9 closed accounts</button>
+  <div class="accordion-panel">
+    <!-- Each closed account entry -->
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME QJZI-AMLZ</div>
+    </div>
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME ZYVL-ANZQ</div>
+    </div>
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME WXVN-VIBN</div>
+    </div>
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME QMZU-AMXQ</div>
+    </div>
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME PQOA-IZLG</div>
+    </div>
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME MQJZ-KQOZ</div>
+    </div>
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME LAQM-AKDU</div>
+    </div>
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME JZKQ-LAMZ</div>
+    </div>
+    <div class="closed-entry">
+      <div class="bnpl-label">BUY NOW PAY LATER</div>
+      <div class="bnpl-code">CHSE PAYOVERTIME NAUJ-ZKIP</div>
+    </div>
+  </div>
+</div>
+
+
+
+    <div class="accordion-item">
+      <button class="accordion-btn">3 credit checks</button>
+      <div class="accordion-panel">
+        <p>CHSE PAYLATER* 4918623</p>
+        <p>CHSE PAYLATER* 9918284</p>
+        <p>CHSE PAYLATER* 4665812</p>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-btn">0 collections</button>
+      <div class="accordion-panel"><p>No collections.</p></div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-btn">0 public records</button>
+      <div class="accordion-panel"><p>No public records.</p></div>
+    </div>
+  </div>
+
+  <script>
+    // === Modal & Accordion Logic (unchanged) ===
+    document.getElementById('open-report').onclick = () => {
+      document.getElementById('overlay').classList.add('visible');
+      document.getElementById('report-modal').classList.add('visible');
+    };
+    document.getElementById('close-report').onclick = () => {
+      document.getElementById('overlay').classList.remove('visible');
+      document.getElementById('report-modal').classList.remove('visible');
+    };
+    document.querySelectorAll('.accordion-btn').forEach(btn =>
+      btn.addEventListener('click', () =>
+        btn.parentElement.classList.toggle('open')
+      )
+    );
+
+    // === Login Logic ===
+    const loginScreen = document.getElementById('login-screen'),
+          dashboard   = document.getElementById('dashboard'),
+          errMsg      = document.getElementById('login-error'),
+          btn         = document.getElementById('login-btn');
+
+    btn.addEventListener('click', () => {
+      const u = document.getElementById('username').value.trim(),
+            p = document.getElementById('password').value;
+      if (u === 'shloak' && p === 'Sac') {
+        loginScreen.classList.remove('visible');
+        loginScreen.classList.add('hidden');
+        setTimeout(() => {
+          dashboard.classList.remove('hidden');
+          dashboard.classList.add('visible');
+        }, 400);
+      } else {
+        errMsg.style.opacity = '1';
+        setTimeout(() => errMsg.style.opacity = '0', 2000);
+      }
+    });
+    ['username','password'].forEach(id =>
+      document.getElementById(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter') btn.click();
+      })
+    );
+  </script>
+</body>
+</html>
