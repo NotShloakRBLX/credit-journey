@@ -1,399 +1,558 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Credit Journey</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* ==== Fade & Visibility Utilities ==== */
-    .fade { transition: opacity 0.4s ease; }
-    .hidden { opacity: 0; pointer-events: none; }
-    .visible { opacity: 1; pointer-events: auto; }
+    /* ===============================
+       FUTURE–AURORA CREDIT JOURNEY UI
+       (distinct look from bank/cc pages)
+       =============================== */
 
-    /* ==== Reset & Base ==== */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { font-family: "Segoe UI", Roboto, sans-serif; color: #333; background: #fff; height: 100%; }
+    :root{
+      --bg:#0b0e17;
+      --panel:#0f1422;
+      --panel-2:#0c1020;
+      --text:#e8edf7;
+      --muted:#9fb0c7;
 
-    /* ==== Page Container ==== */
-    .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; }
+      --rose:#ef4444;
+      --amber:#f59e0b;
+      --emerald:#22c55e;
+      --cyan:#22d3ee;
+      --violet:#8b5cf6;
 
-    /* ==== Header ==== */
-    .header {
-      background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
-      padding: 80px 20px;
-      text-align: center;
-      color: #fff;
-      position: relative;
-    }
-    .header-label {
-      position: absolute; top: 20px; left: 20px; font-size: 0.9rem; opacity: 0.8;
-    }
-    .main-title { font-size: 3rem; margin: 0; }
-
-    /* ==== Content ==== */
-    .content { max-width: 700px; margin: 30px auto; padding: 0 20px; line-height: 1.6; }
-
-    /* ==== Score Box ==== */
-    .score-box { text-align: center; margin-bottom: 40px; }
-    .score-box .label { font-size: 1.2rem; color: #666; margin-bottom: 8px; }
-    .score-box .score { font-size: 3.2rem; font-weight: bold; color: #1e8e3e; margin-bottom: 4px; }
-    .score-box .delta { font-size: 1.1rem; color: #1e8e3e; }
-
-    /* ==== Detail Boxes ==== */
-    .details-box {
-      background: #fafafa;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 24px;
-      margin-bottom: 30px;
-    }
-    .details-box h3 { font-size: 1.2rem; margin-bottom: 16px; color: #333; }
-
-    /* ==== Recent Activity ==== */
-    .activity-list { list-style: none; }
-    .activity-list li { margin-bottom: 12px; font-size: 1rem; }
-    .highlight-green { color: #1e8e3e; font-weight: bold; }
-    .highlight-red   { color: #d93025; font-weight: bold; }
-
-    /* ==== Balances & Stats ==== */
-    .balances p,
-    .stats p { margin-bottom: 12px; font-size: 1rem; }
-    .balances p strong,
-    .stats p strong { font-weight: bold; color: #000; }
-
-    /* ==== View Report Button ==== */
-    .btn-report {
-      display: block; width: 100%;
-      font-size: 1.1rem; font-weight: 500;
-      padding: 14px 20px; margin: 30px 0;
-      border: none; border-radius: 8px;
-      background: linear-gradient(90deg, #0c2a4e, #123b61);
-      color: #fff; text-align: center; cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
-    }
-    .btn-report:hover {
-      background: linear-gradient(90deg, #0a2340, #0f2f4d);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      --glass: linear-gradient( to bottom right, rgba(16,21,40,.72), rgba(12,16,34,.72) ) padding-box,
+               linear-gradient(120deg, rgba(34,211,238,.55), rgba(139,92,246,.55)) border-box;
+      --glow: 0 24px 80px rgba(34,211,238,.22);
     }
 
-    /* ==== Overlay & Modal ==== */
-    .overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .overlay.visible { opacity: 1; pointer-events: auto; }
-    .modal {
-      position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%,-50%) scale(0.9);
-      width: 80%; max-width: 600px; max-height: 80%; overflow-y: auto;
-      background: #fff; border-radius: 8px; padding: 20px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-    .modal.visible {
-      opacity: 1; pointer-events: auto;
-      transform: translate(-50%,-50%) scale(1);
-    }
-    .modal h2 { margin-bottom: 16px; font-size: 1.4rem; }
-    .modal .close-btn {
-      position: absolute; top: 12px; right: 12px;
-      font-size: 1.4rem; background: none; border: none; cursor: pointer; color: #666;
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0; font-family:"Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+      color:var(--text); background:var(--bg); overflow:auto;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    /* ==== Accordion Buttons ==== */
-    .accordion-item { margin-bottom: 12px; }
-    .accordion-btn {
-      width: 100%; padding: 12px 16px;
-      font-size: 1rem; font-weight: bold;
-      color: #000; background: #fff;
-      border: 1px solid #c6c6c6; border-radius: 4px;
-      text-align: left; cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
+    /* ===== Animated aurora background (new look) ===== */
+    .aurora{
+      position:fixed; inset:0; z-index:-2; pointer-events:none; overflow:hidden;
+      background: radial-gradient(1200px 700px at 10% -20%, rgba(34,211,238,.16), transparent 60%),
+                  radial-gradient(1200px 800px at 90% 120%, rgba(139,92,246,.16), transparent 60%),
+                  radial-gradient(900px 600px at 50% 10%, rgba(34,197,94,.12), transparent 60%),
+                  linear-gradient(180deg, #0a0d16 0%, #0b0e17 60%, #0a0d16 100%);
     }
-    .accordion-btn:hover {
-      background: #f5f5f5; border-color: #999;
+    .aurora::before,
+    .aurora::after{
+      content:""; position:absolute; inset:-30%;
+      background: conic-gradient(from 0turn, rgba(34,211,238,.10), rgba(139,92,246,.10), rgba(34,197,94,.10), rgba(34,211,238,.10));
+      filter: blur(70px); animation: swirl 28s linear infinite;
+    }
+    .aurora::after{ animation-duration: 40s; animation-direction: reverse; opacity:.7; }
+    @keyframes swirl{ to{ transform: rotate(1turn); } }
+
+    /* ===== Neon grid overlay ===== */
+    .grid{
+      position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        linear-gradient(transparent 79px, rgba(120,150,210,.06) 80px),
+        linear-gradient(90deg, transparent 79px, rgba(120,150,210,.06) 80px);
+      background-size:80px 80px;
+      mask: radial-gradient(60% 60% at 50% 50%, #000 70%, transparent 100%);
     }
 
-    /* ==== Accordion Panels ==== */
-    .accordion-panel {
-      max-height: 0; overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-      padding: 0 16px;
+    /* ===== Utilities ===== */
+    .fade{ transition:opacity .4s ease; }
+    .hidden{ opacity:0; pointer-events:none; }
+    .visible{ opacity:1; pointer-events:auto; }
+
+    /* ================= LOGIN (sleek cyan) ================= */
+    #login-screen{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:24px;
     }
-    .accordion-item.open .accordion-panel {
-      max-height: 1000px; padding: 12px 16px 16px;
+    .login-shell{
+      width:min(440px, 94vw); border-radius:22px; padding:3px;
+      background: linear-gradient(120deg, #22d3ee, #8b5cf6, #22d3ee);
+      box-shadow: 0 26px 80px rgba(0,0,0,.65), 0 0 120px rgba(34,211,238,.35);
     }
-    .accordion-panel h4 {
-      font-size: 1.1rem; color: #1A73E8;
-      margin-bottom: 8px; font-weight: bold;
+    #login-box{
+      border-radius:20px; padding:36px 30px 28px; text-align:center; color:#e8e7ef;
+      background:#0c111f; box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
     }
-    .accordion-panel p {
-      margin-bottom: 8px; color: #202124;
+    .login-title{
+      font-size: clamp(1.8rem, 3.6vw, 2.2rem); font-weight:800; letter-spacing:.3px;
+      background: linear-gradient(90deg, #22d3ee, #8b5cf6 45%, #22d3ee);
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+      margin-bottom:22px;
     }
-    .accordion-panel a {
-      display: block; margin-bottom: 8px;
-      color: #1A73E8; text-decoration: none;
+    #login-error{ height:1.2em; margin-bottom:12px; color:#ff6b6b; opacity:0; transition:opacity .3s; }
+    .input-group{ position:relative; margin:14px 0; }
+    .input{
+      width:100%; padding:14px 14px 14px 50px; border-radius:14px;
+      background:#0e152b; border:1px solid #213154; color:#e5e7eb; font-size:1rem;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .input::placeholder{ color:#9ab1d7; }
+    .input:focus{ outline:none; border-color:#22d3ee; box-shadow:0 0 0 4px rgba(34,211,238,.18); background:#0c1430; }
+    .input-icon{ position:absolute; top:50%; left:14px; transform:translateY(-50%); width:22px; height:22px; filter: drop-shadow(0 2px 4px rgba(34,211,238,.55)); }
+
+    #login-btn{
+      width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+      padding:13px 16px; border-radius:14px; cursor:pointer;
+      background:#0e1426; color:#fff; font-weight:800; border:1px solid #24325f;
+      transition: box-shadow .2s, border-color .2s, transform .05s, filter .2s;
+    }
+    #login-btn:hover, #login-btn:focus{ border-color:#22d3ee; box-shadow:0 0 0 4px rgba(34,211,238,.18); outline:none; filter:saturate(1.08); }
+    #login-btn:active{ transform:translateY(1px); }
+    .btn-icon{ width:20px; height:20px; filter: drop-shadow(0 2px 4px rgba(34,211,238,.45)); }
+
+    /* ===================== LAYOUT ===================== */
+    .page{ position:absolute; inset:0; overflow:auto; }
+    .topbar{
+      position:sticky; top:0; z-index:5; padding:14px 20px; backdrop-filter: blur(10px);
+      background: linear-gradient( to right, rgba(8,12,24,.72), rgba(10,14,26,.58) );
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .brand{
+      font-weight:900; letter-spacing:.4px;
+      background: linear-gradient(90deg, #22d3ee, #8b5cf6);
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+      font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    }
+    .chip{
+      padding:8px 12px; border-radius:999px; font-size:.9rem; color:#dfe3ff;
+      background: linear-gradient(120deg, #0f152b, #0b1022); border:1px solid rgba(255,255,255,.08);
     }
 
-    .closed-entry { margin-bottom: 16px; }
-    .closed-entry .bnpl-label {
-      color: #1A73E8; font-weight: bold; font-size: 0.95rem;
+    .container{ max-width:1200px; margin:28px auto 72px; padding:0 20px; }
+    .cards{ display:grid; grid-template-columns: repeat(12, 1fr); gap:16px; }
+
+    .card{
+      grid-column: span 6; border-radius:18px; padding:18px; background: var(--glass);
+      border:2px solid transparent; color:var(--text);
+      box-shadow: var(--glow), inset 0 0 0 1px rgba(255,255,255,.03);
+      backdrop-filter: blur(10px);
+      transition: transform .06s, box-shadow .25s, filter .25s;
     }
-    .closed-entry .bnpl-code {
-      color: #5F6368; font-weight: bold; font-size: 0.9rem; margin-top: 4px;
+    .card:hover{ transform: translateY(-2px); filter: saturate(1.05); }
+    .card h3{ margin:0 0 8px; font-weight:800; color:#eaf2ff; }
+    .muted{ color:var(--muted); }
+    .stat{ font-weight:900; }
+
+    @media (max-width: 900px){ .card{ grid-column: span 12; } }
+
+    /* ===================== SCORE MODULE ===================== */
+    .score-wrap{ display:flex; align-items:center; gap:18px; }
+    .gauge{
+      --pct: 0; /* set via JS 0..100 */
+      width:220px; height:220px; display:grid; place-items:center; position:relative;
+      isolation:isolate; /* so internal shadows sit above card */
     }
+    .gauge svg{ width:100%; height:100%; transform:rotate(-90deg); }
+    .g-track{ fill:none; stroke:#141c33; stroke-width:18; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+    .g-prog{
+      fill:none; stroke: url(#gradScore);
+      stroke-width:18; stroke-linecap:round;
+      stroke-dasharray: var(--pct) 100;
+      transition: stroke-dasharray .9s cubic-bezier(.22,.9,.2,1), stroke .2s;
+      filter: drop-shadow(0 6px 14px rgba(34,211,238,.35));
+    }
+    /* center the number exactly, without affecting the ring */
+.g-center{ 
+  position:absolute; 
+  inset:0;             /* fill the gauge box */
+  text-align:center;
+}
+
+/* number dead-center of the ring */
+.g-center .g-score{
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%, -50%);
+}
+
+/* delta just below the number */
+.g-center .g-delta{
+  position:absolute;
+  left:50%; top:68%;
+  transform:translate(-50%, -50%);
+  color:#7dd3fc; font-weight:700;
+}
+
+/* keep the “Scale: 300–850” anchored at the bottom of the ring */
+.g-center > .muted{
+  position:absolute;
+  left:50%; bottom:10px;
+  transform:translateX(-50%);
+  margin:0;
+}
+
+    .scale{
+      display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; font-size:.86rem;
+    }
+    .scale .chip{
+      background: linear-gradient(120deg, #0b1329, #0b1224); border-color:#1f2b4a;
+      color:#cfe6ff; padding:6px 10px;
+    }
+    .scale .active{ outline:2px solid #22d3ee; color:#fff; }
+
+    /* ===================== LISTS ===================== */
+    .list{ list-style:none; margin:0; padding:0; }
+    .list li{
+      padding:10px 12px; border-radius:12px; margin:8px 0;
+      background: linear-gradient(#0e1426,#0b1224) padding-box,
+                  linear-gradient(135deg, rgba(34,211,238,.45), rgba(139,92,246,.45)) border-box;
+      border:1px solid transparent;
+    }
+    .pos{ color:#34d399; font-weight:800; }
+    .neg{ color:#f87171; font-weight:800; }
+
+    .kv{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid rgba(255,255,255,.07); }
+    .kv:first-child{ border-top:none; }
+
+    .cta{
+      width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+      padding:14px; border-radius:14px; cursor:pointer; margin-top:16px;
+      background: linear-gradient(#0e1426,#0b1224) padding-box,
+                  linear-gradient(135deg, rgba(34,211,238,.7), rgba(139,92,246,.7)) border-box;
+      border:1px solid transparent; color:#fff; font-weight:900; box-shadow: var(--glow);
+      transition: transform .05s, box-shadow .2s, filter .2s;
+    }
+    .cta:hover{ filter:saturate(1.08); box-shadow: 0 16px 40px rgba(34,211,238,.28); }
+    .cta svg{ width:20px; height:20px; }
+
+    /* ===================== MODAL / ACCORDION ===================== */
+    .overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.5);
+      opacity:0; pointer-events:none; transition:opacity .25s ease;
+    }
+    .overlay.visible{ opacity:1; pointer-events:auto; }
+    .modal{
+      position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.94);
+      width:min(820px, 94vw); border-radius:18px; padding:18px;
+      background: var(--glass); border:2px solid transparent; color:var(--text);
+      box-shadow: 0 24px 80px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.03);
+      backdrop-filter: blur(10px);
+      opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    }
+    .modal.visible{ opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
+    .modal h2{ margin:6px 0 10px; font-weight:900; }
+    .modal .close-btn{ position:absolute; top:8px; right:10px; font-size:1.3rem; background:none; border:none; color:var(--muted); cursor:pointer; }
+
+    .accord-item{ margin:12px 0; }
+    .accord-btn{
+      width:100%; text-align:left; padding:12px 14px; border-radius:12px; cursor:pointer;
+      background: linear-gradient(#0f152b,#0b1224); border:1px solid #22335a; color:#eaf2ff; font-weight:800;
+    }
+    .accord-panel{
+      max-height:0; overflow:hidden; transition:max-height .26s ease, padding .26s ease;
+      padding:0 12px; border-left:2px dashed rgba(34,211,238,.3); margin-left:8px;
+    }
+    .accord-item.open .accord-panel{ max-height:1200px; padding:12px 12px 14px; }
+    .accord-panel .sub{ color:#a9c0de; font-weight:700; margin:8px 0 6px; }
+
+    @media (prefers-reduced-motion: reduce){
+      .fade, .modal, .card, .cta{ transition:none !important; }
+      .aurora::before, .aurora::after{ animation:none !important; }
+    }
+
+/* Option B: place the scale label outside the ring */
+.gauge{ padding-bottom:18px; }
+
+.g-center > .muted{
+  position:absolute;
+  left:50%;
+  bottom:-14px;              /* sits just below the ring */
+  transform:translateX(-50%);
+  white-space:nowrap;
+  line-height:1;
+}
+
+.g-center .g-score{ transform:translate(-50%, -54%); } /* nudge up a bit */
+.g-center .g-delta{ top:62%; }                         /* sits under the score */
+
+/* Bigger score number */
+.g-center .g-score{
+  font-size: 2.4rem;   /* tweak to taste */
+  font-weight: 900;    /* already heavy, but forces it */
+}
+
+/* Hide the scale label below the ring */
+.g-center > .muted{ display:none !important; }
+
+/* If you used Option B padding, remove it */
+.gauge{ padding-bottom: 0; }
+
   </style>
 </head>
 <body>
+  <div class="aurora"></div>
+  <div class="grid"></div>
 
-  <!-- ===== LOGIN SCREEN ===== -->
-  <div id="login-screen" class="fade visible" style="
-      position:absolute; top:0; left:0; width:100%; height:100%;
-      display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(135deg,#2C3E50 0%,#4CA1AF 100%);">
-    <div style="
-        background:rgba(255,255,255,0.1); padding:40px; border-radius:12px;
-        width:90%; max-width:360px; text-align:center;
-        box-shadow:0 8px 24px rgba(0,0,0,0.3); color:#fff;">
-      <h2 style="margin-bottom:24px; font-weight:300; font-size:1.8rem;">
-        Login
-      </h2>
-      <div id="login-error" style="
-          height:1.2em; margin-bottom:12px; color:#ff5e5e;
-          opacity:0; transition:opacity 0.3s; font-size:0.9rem;">
-        Invalid credentials
+  <!-- =================== LOGIN =================== -->
+  <div id="login-screen" class="fade visible">
+    <div class="login-shell">
+      <div id="login-box">
+        <h2 class="login-title">Welcome to<br/>Credit Journey</h2>
+
+        <div id="login-error">Invalid credentials</div>
+
+        <div class="input-group">
+          <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#22d3ee" d="M12 13.2a5.2 5.2 0 1 0 0-10.4 5.2 5.2 0 0 0 0 10.4Z"/>
+            <path fill="#8b5cf6" d="M4.2 20.6c0-3.4 3.9-6.2 7.8-6.2s7.8 2.8 7.8 6.2v.2c0 .7-.6 1.2-1.3 1.2H5.5c-.7 0-1.3-.5-1.3-1.2v-.2Z"/>
+          </svg>
+          <input id="username" class="input" type="text" placeholder="Username" />
+        </div>
+
+        <div class="input-group">
+          <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#22d3ee" d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2Zm-8-2a3 3 0 1 1 6 0v2H9V7Zm4 9.7V17a1 1 0 1 0-2 0v-.3a2 2 0 1 0 2 0Z"/>
+          </svg>
+          <input id="password" class="input" type="password" placeholder="Password" />
+        </div>
+
+        <button id="login-btn">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#8b5cf6" d="M12 3a1 1 0 0 1 1 1v5h-2V5H6v14h5v-4h2v5a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7Zm8.7 9.3-4-4-1.4 1.4 1.3 1.3H12v2h4.6l-1.3 1.3 1.4 1.4 4-4a1 1 0 0 0 0-1.4Z"/>
+          </svg>
+          Log In
+        </button>
       </div>
-      <div style="position:relative; margin-bottom:20px;">
-        <!-- user icon SVG -->
-        <svg viewBox="0 0 24 24" style="
-            position:absolute; top:50%; left:12px; transform:translateY(-50%);
-            width:20px; height:20px; fill:rgba(255,255,255,0.8);">
-          <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5
-                   2.3-5 5 2.3 5 5 5zm0 2c-3.3 
-                   0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
-        </svg>
-        <input id="username" type="text" placeholder="Username" style="
-            width:100%; padding:12px 12px 12px 44px; border:none;
-            border-radius:6px; background:rgba(255,255,255,0.2);
-            color:#fff; font-size:1rem;" />
-      </div>
-      <div style="position:relative; margin-bottom:20px;">
-        <!-- lock icon SVG -->
-        <svg viewBox="0 0 24 24" style="
-            position:absolute; top:50%; left:12px; transform:translateY(-50%);
-            width:20px; height:20px; fill:rgba(255,255,255,0.8);">
-          <path d="M17 8V6c0-2.8-2.2-5-5-5S7
-                   3.2 7 6v2H5v14h14V8h-2zm-8
-                   0V6c0-1.7 1.3-3 3-3s3 1.3
-                   3 3v2H9z"/>
-        </svg>
-        <input id="password" type="password" placeholder="Password" style="
-            width:100%; padding:12px 12px 12px 44px; border:none;
-            border-radius:6px; background:rgba(255,255,255,0.2);
-            color:#fff; font-size:1rem;" />
-      </div>
-      <button id="login-btn" style="
-          width:100%; padding:12px; background:#1e8e3e; border:none;
-          border-radius:6px; color:#fff; font-size:1.1rem;
-          font-weight:500; cursor:pointer; transition:background 0.2s;">
-        Log In
-      </button>
     </div>
   </div>
 
-  <!-- ===== DASHBOARD WRAPPER ===== -->
-  <div id="dashboard" class="fade hidden">
-
-    <!-- ===== CREDIT JOURNEY PAGE ===== -->
-    <div class="page active">
-      <div class="header">
-        <h1 class="main-title"><strong>Credit Journey</strong></h1>
+  <!-- =================== DASHBOARD =================== -->
+  <div id="dashboard" class="hidden fade">
+    <div class="page">
+      <div class="topbar">
+        <div class="brand">Credit Journey</div>
+        <div class="chip">Score refreshed: <strong>Aug 06, 2025</strong></div>
       </div>
-      <div class="content">
-        <!-- Score -->
-        <div class="score-box">
-          <div class="label">Your credit score</div>
-          <div class="score">746</div>
-          <div class="delta">(+12p)</div>
-        </div>
 
-        <!-- Recent Activity -->
-        <div class="details-box">
-          <h3>Recent Credit Activity</h3>
-          <ul class="activity-list">
-            <li><span class="highlight-green">+12pts</span> – 08/05/2025</li>
-            <li><span class="highlight-green">+2pts</span> – 07/22/2025</li>
-            <li><span class="highlight-red">-5pts</span> – 06/25/2025</li>
-            <li><span class="highlight-red">-2pts</span> – 06/08/2025</li>
-          </ul>
-        </div>
+      <div class="container">
+        <div class="cards">
+          <!-- SCORE CARD -->
+          <div class="card" style="grid-column: span 7;">
+            <h3>Your credit score</h3>
+            <div class="score-wrap">
+              <div class="gauge" id="gauge">
+                <svg viewBox="0 0 220 220" aria-hidden="true">
+                  <defs>
+                    <!-- red → amber → green stroke -->
+                    <linearGradient id="gradScore" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%"  stop-color="#ef4444"/>
+                      <stop offset="50%" stop-color="#f59e0b"/>
+                      <stop offset="100%" stop-color="#22c55e"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- full ring track -->
+                  <circle class="g-track" cx="110" cy="110" r="86" />
+                  <!-- progress: pathLength=100 → easy % math -->
+                  <circle class="g-prog"  cx="110" cy="110" r="86" pathLength="100" />
+                </svg>
+                <div class="g-center">
+                  <div class="g-score" id="scoreNum">746</div>
+                  <div class="g-delta" id="scoreDelta">+12p</div>
+                  <div class="muted" style="margin-top:6px;">Scale: 300–850</div>
+                </div>
+              </div>
 
-        <!-- Balances -->
-        <div class="details-box balances">
-          <h3>Total balances</h3>
-          <p>Total credit card balances: <strong>$0.00</strong></p>
-          <p>Total loan balances: <strong>$0.00</strong></p>
-          <p><strong>Total debt: $0.00</strong></p>
-          <p>Credit Utilization: </p> <p><strong> <span class="highlight-green">0% - Great!</span></strong></p>
-        </div>
+              <div>
+                <div class="muted">Status</div>
+                <div class="stat" id="scoreLabel" style="font-size:1.4rem;margin:2px 0 8px;">Very Good</div>
+                <!-- brackets -->
+                <div class="scale" id="scaleChips">
+                  <span class="chip">Poor 300–579</span>
+                  <span class="chip">Fair 580–669</span>
+                  <span class="chip">Good 670–739</span>
+                  <span class="chip">Very Good 740–799</span>
+                  <span class="chip">Excellent 800–850</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <!-- Additional Stats -->
-        <div class="details-box stats">
-          <p>Late payments: <strong>1</strong> – Good!</p>
-          <p>Oldest account: <strong>120d</strong> – Great!</p>
-          <p>Credit checks: <strong>3</strong> – Great!</p>
-          <p>Available credit: <strong>$1,300 / $1,300</strong></p>
-        </div>
+          <!-- ACTIVITY -->
+          <div class="card" style="grid-column: span 5;">
+            <h3>Recent Credit Activity</h3>
+            <ul class="list">
+              <li><span class="pos">+12pts</span> — 08/05/2025</li>
+              <li><span class="pos">+2pts</span> — 07/22/2025</li>
+              <li><span class="neg">-5pts</span> — 06/25/2025</li>
+              <li><span class="neg">-2pts</span> — 06/08/2025</li>
+            </ul>
+          </div>
 
-        <!-- Report Button -->
-        <button id="open-report" class="btn-report">View Credit Report</button>
+          <!-- BALANCES -->
+          <div class="card" style="grid-column: span 6;">
+            <h3>Total balances</h3>
+            <div class="kv"><span class="muted">Total credit card balances</span><strong>$0.00</strong></div>
+            <div class="kv"><span class="muted">Total loan balances</span><strong>$0.00</strong></div>
+            <div class="kv"><span class="muted">Total debt</span><strong>$0.00</strong></div>
+            <div class="kv"><span class="muted">Credit Utilization</span><strong><span class="pos">0% - Great!</span></strong></div>
+
+            <button id="open-report" class="cta" style="margin-top:18px;">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#7dd3fc" d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm3 4v2h10V8H7zm0 4v2h10v-2H7z"/></svg>
+              View Credit Report
+            </button>
+          </div>
+
+          <!-- EXTRA STATS -->
+          <div class="card" style="grid-column: span 6;">
+            <h3>Additional stats</h3>
+            <div class="kv"><span class="muted">Late payments</span><strong>1</strong> <span class="muted">– Good!</span></div>
+            <div class="kv"><span class="muted">Oldest account</span><strong>120d</strong> <span class="muted">– Great!</span></div>
+            <div class="kv"><span class="muted">Credit checks</span><strong>3</strong> <span class="muted">– Great!</span></div>
+            <div class="kv"><span class="muted">Available credit</span><strong>$1,300 / $1,300</strong></div>
+          </div>
+        </div>
       </div>
     </div>
-
   </div>
-  <!-- /#dashboard -->
 
-  <!-- Modal & Overlay -->
+  <!-- ============ OVERLAY & REPORT MODAL ============ -->
   <div id="overlay" class="overlay"></div>
+
   <div id="report-modal" class="modal">
     <button id="close-report" class="close-btn">×</button>
     <h2>Credit Report (as of Aug 06, 2025)</h2>
 
-    <div class="accordion-item">
-      <button class="accordion-btn">2 open accounts</button>
-      <div class="accordion-panel">
-        <h4>Revolving accounts</h4>
-        <p>Total balances: <strong>$0.00</strong></p>
-        <p>Total credit: <strong>$650.00</strong></p>
-        <div>
-  <strong>CREDIT CARD - ****7295</strong> – $0.00 – Opened on Apr 7, 2025
-</div>
-        <div>
-  <strong>CREDIT CARD - ****8126</strong> – $0.00 – Opened on Apr 13, 2025
-</div>
-
+    <div class="accord-item">
+      <button class="accord-btn">2 open accounts</button>
+      <div class="accord-panel">
+        <div class="sub">Revolving accounts</div>
+        <div class="kv"><span class="muted">Total balances</span><strong>$0.00</strong></div>
+        <div class="kv"><span class="muted">Total credit</span><strong>$650.00</strong></div>
+        <div style="margin-top:10px;">
+          <div><strong>CREDIT CARD - ****7295</strong> – $0.00 – Opened on Apr 7, 2025</div>
+          <div style="margin-top:6px;"><strong>CREDIT CARD - ****8126</strong> – $0.00 – Opened on Apr 13, 2025</div>
+        </div>
       </div>
     </div>
 
-    <div class="accordion-item">
-      <button class="accordion-btn">0 installment accounts</button>
-      <div class="accordion-panel">
-        <p>No installment accounts.</p>
+    <div class="accord-item">
+      <button class="accord-btn">0 installment accounts</button>
+      <div class="accord-panel">
+        <p class="muted">No installment accounts.</p>
       </div>
     </div>
 
-    <div class="accordion-item">
-  <button class="accordion-btn">9 closed accounts</button>
-  <div class="accordion-panel">
-    <!-- Each closed account entry -->
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME QJZI-AMLZ</div>
+    <div class="accord-item">
+      <button class="accord-btn">9 closed accounts</button>
+      <div class="accord-panel">
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME QJZI-AMLZ</div>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME ZYVL-ANZQ</div>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME WXVN-VIBN</div>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME QMZU-AMXQ</div>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME PQOA-IZLG</div>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME MQJZ-KQOZ</div>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME LAQM-AKDU</div>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME JZKQ-LAMZ</div>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME NAUJ-ZKIP</div>
+      </div>
     </div>
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME ZYVL-ANZQ</div>
-    </div>
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME WXVN-VIBN</div>
-    </div>
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME QMZU-AMXQ</div>
-    </div>
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME PQOA-IZLG</div>
-    </div>
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME MQJZ-KQOZ</div>
-    </div>
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME LAQM-AKDU</div>
-    </div>
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME JZKQ-LAMZ</div>
-    </div>
-    <div class="closed-entry">
-      <div class="bnpl-label">BUY NOW PAY LATER</div>
-      <div class="bnpl-code">CHSE PAYOVERTIME NAUJ-ZKIP</div>
-    </div>
-  </div>
-</div>
 
-
-
-    <div class="accordion-item">
-      <button class="accordion-btn">3 credit checks</button>
-      <div class="accordion-panel">
+    <div class="accord-item">
+      <button class="accord-btn">3 credit checks</button>
+      <div class="accord-panel">
         <p>CHSE PAYLATER* 4918623</p>
         <p>CHSE PAYLATER* 9918284</p>
         <p>CHSE PAYLATER* 4665812</p>
       </div>
     </div>
 
-    <div class="accordion-item">
-      <button class="accordion-btn">0 collections</button>
-      <div class="accordion-panel"><p>No collections.</p></div>
+    <div class="accord-item">
+      <button class="accord-btn">0 collections</button>
+      <div class="accord-panel"><p class="muted">No collections.</p></div>
     </div>
 
-    <div class="accordion-item">
-      <button class="accordion-btn">0 public records</button>
-      <div class="accordion-panel"><p>No public records.</p></div>
+    <div class="accord-item">
+      <button class="accord-btn">0 public records</button>
+      <div class="accord-panel"><p class="muted">No public records.</p></div>
     </div>
   </div>
 
   <script>
-    // === Modal & Accordion Logic (unchanged) ===
-    document.getElementById('open-report').onclick = () => {
-      document.getElementById('overlay').classList.add('visible');
-      document.getElementById('report-modal').classList.add('visible');
-    };
-    document.getElementById('close-report').onclick = () => {
-      document.getElementById('overlay').classList.remove('visible');
-      document.getElementById('report-modal').classList.remove('visible');
-    };
-    document.querySelectorAll('.accordion-btn').forEach(btn =>
-      btn.addEventListener('click', () =>
-        btn.parentElement.classList.toggle('open')
-      )
-    );
+    // ===== Score data (keep existing values) =====
+    const SCORE_VALUE = 756;
+    const SCORE_DELTA = +12; // "+12p"
 
-    // === Login Logic ===
+    // ===== Gauge rendering =====
+    const gauge = document.getElementById('gauge');
+    const prog  = gauge.querySelector('.g-prog');
+    const scoreNum = document.getElementById('scoreNum');
+    const scoreDelta = document.getElementById('scoreDelta');
+    const scoreLabel = document.getElementById('scoreLabel');
+
+    function setScore(v){
+      const min=300, max=850;
+      const pct = Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100));
+      gauge.style.setProperty('--pct', pct.toFixed(2));
+      prog.style.strokeDasharray = `${pct} 100`;
+      scoreNum.textContent = v;
+
+      // delta text
+      const sign = SCORE_DELTA >= 0 ? '+' : '';
+      scoreDelta.textContent = `${sign}${SCORE_DELTA}p`;
+
+      // label + highlight chips
+      let label = 'Poor';
+      if (v >= 800) label = 'Excellent';
+      else if (v >= 740) label = 'Very Good';
+      else if (v >= 670) label = 'Good';
+      else if (v >= 580) label = 'Fair';
+      scoreLabel.textContent = label;
+
+      // mark active bracket
+      const chips = Array.from(document.querySelectorAll('#scaleChips .chip'));
+      chips.forEach(c => c.classList.remove('active'));
+      const idx = label === 'Excellent' ? 4 : label === 'Very Good' ? 3 : label === 'Good' ? 2 : label === 'Fair' ? 1 : 0;
+      chips[idx].classList.add('active');
+    }
+    setScore(SCORE_VALUE);
+
+    // ===== Report modal & accordions =====
+    const overlay = document.getElementById('overlay');
+    const report  = document.getElementById('report-modal');
+    const open = ()=>{ overlay.classList.add('visible'); report.classList.add('visible'); };
+    const close= ()=>{ report.classList.remove('visible'); overlay.classList.remove('visible'); };
+
+    document.getElementById('open-report').addEventListener('click', open);
+    document.getElementById('close-report').addEventListener('click', close);
+
+    document.querySelectorAll('.accord-btn').forEach(btn => {
+      btn.addEventListener('click', () => btn.parentElement.classList.toggle('open'));
+    });
+
+    // ===== Login logic (kept) =====
     const loginScreen = document.getElementById('login-screen'),
           dashboard   = document.getElementById('dashboard'),
           errMsg      = document.getElementById('login-error'),
           btn         = document.getElementById('login-btn');
 
-    btn.addEventListener('click', () => {
+    function tryLogin(){
       const u = document.getElementById('username').value.trim(),
             p = document.getElementById('password').value;
-      if (u === 'shloak' && p === 'Sac') {
+      if (u === 'shloak' && p === 'Sac'){
         loginScreen.classList.remove('visible');
         loginScreen.classList.add('hidden');
         setTimeout(() => {
           dashboard.classList.remove('hidden');
           dashboard.classList.add('visible');
-        }, 400);
+        }, 300);
       } else {
         errMsg.style.opacity = '1';
-        setTimeout(() => errMsg.style.opacity = '0', 2000);
+        setTimeout(() => errMsg.style.opacity = '0', 1800);
       }
+    }
+    btn.addEventListener('click', tryLogin);
+    ['username','password'].forEach(id=>{
+      document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') tryLogin(); });
     });
-    ['username','password'].forEach(id =>
-      document.getElementById(id).addEventListener('keydown', e => {
-        if (e.key === 'Enter') btn.click();
-      })
-    );
   </script>
 </body>
 </html>
-
-
-
