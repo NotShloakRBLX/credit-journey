@@ -36,7 +36,7 @@
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    /* ===== Animated aurora background ===== */
+    /* ===== Animated aurora background (new look) ===== */
     .aurora{
       position:fixed; inset:0; z-index:-2; pointer-events:none; overflow:hidden;
       background: radial-gradient(1200px 700px at 10% -20%, rgba(34,211,238,.16), transparent 60%),
@@ -111,12 +111,10 @@
     /* ===================== LAYOUT ===================== */
     .page{ position:absolute; inset:0; overflow:auto; }
     .topbar{
-      position:sticky; top:0; z-index:5;
-      padding: calc(10px + env(safe-area-inset-top)) 20px 12px;
-      backdrop-filter: blur(10px);
+      position:sticky; top:0; z-index:5; padding:14px 20px; backdrop-filter: blur(10px);
       background: linear-gradient( to right, rgba(8,12,24,.72), rgba(10,14,26,.58) );
       border-bottom:1px solid rgba(255,255,255,.06);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      display:flex; align-items:center; justify-content:space-between;
     }
     .brand{
       font-weight:900; letter-spacing:.4px;
@@ -127,7 +125,6 @@
     .chip{
       padding:8px 12px; border-radius:999px; font-size:.9rem; color:#dfe3ff;
       background: linear-gradient(120deg, #0f152b, #0b1022); border:1px solid rgba(255,255,255,.08);
-      white-space: nowrap;
     }
 
     .container{ max-width:1200px; margin:28px auto 72px; padding:0 20px; }
@@ -152,7 +149,7 @@
     .gauge{
       --pct: 0; /* set via JS 0..100 */
       width:220px; height:220px; display:grid; place-items:center; position:relative;
-      isolation:isolate;
+      isolation:isolate; /* so internal shadows sit above card */
     }
     .gauge svg{ width:100%; height:100%; transform:rotate(-90deg); }
     .g-track{ fill:none; stroke:#141c33; stroke-width:18; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
@@ -163,37 +160,26 @@
       transition: stroke-dasharray .9s cubic-bezier(.22,.9,.2,1), stroke .2s;
       filter: drop-shadow(0 6px 14px rgba(34,211,238,.35));
     }
-
-    .g-center{
-      position:absolute; inset:0; text-align:center;
-    }
+    /* center the number & labels */
+    .g-center{ position:absolute; inset:0; text-align:center; }
     .g-center .g-score{
-      position:absolute; left:50%; top:50%;
-      transform:translate(-50%,-50%);
-      font-weight:900;
-      font-size: clamp(2.4rem, 10vw, 3.2rem);
-      color:#fff;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35);
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      font-size:3.2rem; font-weight:900; letter-spacing:.6px;
     }
     .g-center .g-delta{
-      position:absolute; left:50%; top:68%;
-      transform:translate(-50%,-50%);
+      position:absolute; left:50%; top:68%; transform:translate(-50%,-50%);
       color:#7dd3fc; font-weight:700;
-      font-size: clamp(1rem, 4.2vw, 1.1rem);
     }
-    /* Hide scale line; remove this rule if you want it visible again */
-    .g-center > .muted{ display:none; }
-
     .scale{
       display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; font-size:.86rem;
     }
     .scale .chip{
       background: linear-gradient(120deg, #0b1329, #0b1224); border-color:#1f2b4a;
-      color:#cfe6ff; padding:6px 10px;
+      color:#cfe6ff; padding:6px 10px; border:1px solid #1f2b4a; border-radius:999px;
     }
     .scale .active{ outline:2px solid #22d3ee; color:#fff; }
 
-    /* ===================== LISTS ===================== */
+    /* ===================== LISTS / STATS ===================== */
     .list{ list-style:none; margin:0; padding:0; }
     .list li{
       padding:10px 12px; border-radius:12px; margin:8px 0;
@@ -204,28 +190,8 @@
     .pos{ color:#34d399; font-weight:800; }
     .neg{ color:#f87171; font-weight:800; }
 
-    /* ====== FIXED: metric rows behave on mobile ====== */
-    .kv{
-      display:flex;
-      flex-wrap:wrap;            /* allow safe wrapping */
-      align-items:center;
-      gap:6px 10px;
-      padding:8px 0;
-      border-top:1px solid rgba(255,255,255,.07);
-    }
+    .kv{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid rgba(255,255,255,.07); }
     .kv:first-child{ border-top:none; }
-    .kv > .muted:first-child{
-      flex:1 1 50%;              /* label grows, keeps room for values */
-      min-width:140px;
-    }
-    .kv strong{
-      margin-left:auto;          /* pushes values to the right edge */
-      text-align:right;
-      overflow-wrap:anywhere;    /* break long values like $1,300 / $1,300 */
-    }
-    .kv strong + .muted{         /* the trailing “– Great!” stays with the value */
-      white-space:nowrap;
-    }
 
     .cta{
       width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
@@ -251,7 +217,6 @@
       box-shadow: 0 24px 80px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.03);
       backdrop-filter: blur(10px);
       opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
-      max-height: 84vh; overflow:auto;
     }
     .modal.visible{ opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
     .modal h2{ margin:6px 0 10px; font-weight:900; }
@@ -268,20 +233,6 @@
     }
     .accord-item.open .accord-panel{ max-height:1200px; padding:12px 12px 14px; }
     .accord-panel .sub{ color:#a9c0de; font-weight:700; margin:8px 0 6px; }
-
-    /* ===================== MOBILE TUNING ===================== */
-    @media (max-width: 640px){
-      .topbar{ flex-wrap:wrap; }
-      .chip{ width:100%; text-align:center; }
-      .container{ margin:16px auto 56px; padding:0 12px; }
-      .cards{ gap:12px; }
-      .card{ padding:14px; border-radius:16px; }
-      .score-wrap{ flex-direction:column; align-items:center; text-align:center; }
-      .gauge{ width: clamp(160px, 58vw, 220px); height: clamp(160px, 58vw, 220px); }
-      .scale{ justify-content:center; gap:8px; }
-      .scale .chip{ padding:8px 12px; border-radius:999px; }
-      .kv > .muted:first-child{ min-width:0; flex-basis:48%; }
-    }
 
     @media (prefers-reduced-motion: reduce){
       .fade, .modal, .card, .cta{ transition:none !important; }
@@ -336,8 +287,8 @@
 
       <div class="container">
         <div class="cards">
-          <!-- SCORE CARD -->
-          <div class="card" style="grid-column: span 7;">
+          <!-- SCORE CARD (now full width) -->
+          <div class="card" style="grid-column: span 12;">
             <h3>Your credit score</h3>
             <div class="score-wrap">
               <div class="gauge" id="gauge">
@@ -355,7 +306,6 @@
                 <div class="g-center">
                   <div class="g-score" id="scoreNum">746</div>
                   <div class="g-delta" id="scoreDelta">+12p</div>
-                  <div class="muted">Scale: 300–850</div>
                 </div>
               </div>
 
@@ -371,17 +321,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- ACTIVITY -->
-          <div class="card" style="grid-column: span 5;">
-            <h3>Recent Credit Activity</h3>
-            <ul class="list">
-              <li><span class="pos">+12pts</span> — 08/05/2025</li>
-              <li><span class="pos">+2pts</span> — 07/22/2025</li>
-              <li><span class="neg">-5pts</span> — 06/25/2025</li>
-              <li><span class="neg">-2pts</span> — 06/08/2025</li>
-            </ul>
           </div>
 
           <!-- BALANCES -->
@@ -492,9 +431,11 @@
       prog.style.strokeDasharray = `${pct} 100`;
       scoreNum.textContent = v;
 
+      // delta text
       const sign = SCORE_DELTA >= 0 ? '+' : '';
       scoreDelta.textContent = `${sign}${SCORE_DELTA}p`;
 
+      // label + highlight chips
       let label = 'Poor';
       if (v >= 800) label = 'Excellent';
       else if (v >= 740) label = 'Very Good';
@@ -502,6 +443,7 @@
       else if (v >= 580) label = 'Fair';
       scoreLabel.textContent = label;
 
+      // mark active bracket
       const chips = Array.from(document.querySelectorAll('#scaleChips .chip'));
       chips.forEach(c => c.classList.remove('active'));
       const idx = label === 'Excellent' ? 4 : label === 'Very Good' ? 3 : label === 'Good' ? 2 : label === 'Fair' ? 1 : 0;
