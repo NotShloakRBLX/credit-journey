@@ -294,7 +294,7 @@
     <div class="page">
       <div class="topbar">
         <div class="brand">Credit Journey</div>
-        <div class="chip">Score refreshed: <strong>Aug 06, 2025</strong></div>
+        <div class="chip">Score refreshed: <strong>Sep 24, 2025</strong></div>
       </div>
 
       <div class="container">
@@ -338,10 +338,10 @@
           <!-- BALANCES -->
           <div class="card" style="grid-column: span 6;">
             <h3>Total balances</h3>
-            <div class="kv"><span class="muted">Total credit card balances</span><strong>$68.25</strong></div>
-            <div class="kv"><span class="muted">Total loan balances</span><strong>$0.00</strong></div>
-            <div class="kv"><span class="muted">Total debt</span><strong>$68.25</strong></div>
-            <div class="kv"><span class="muted">Credit Utilization</span><strong><span class="pos">5.25% - Great!</span></strong></div>
+            <div class="kv"><span class="muted">Total credit card balances</span><strong>$87.75</strong></div>
+            <div class="kv"><span class="muted">Total loan balances</span><strong>$53.35</strong></div>
+            <div class="kv"><span class="muted">Total debt</span><strong>$141.10</strong></div>
+            <div class="kv"><span class="muted">Credit Utilization</span><strong><span class="pos">10.85% - Great!</span></strong></div>
 
             <button id="open-report" class="cta" style="margin-top:18px;">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#7dd3fc" d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm3 4v2h10V8H7zm0 4v2h10v-2H7z"/></svg>
@@ -353,9 +353,9 @@
           <div class="card" style="grid-column: span 6;">
             <h3>Additional stats</h3>
             <div class="kv"><span class="muted">Late payments</span><strong>1</strong> <span class="muted">– Good!</span></div>
-            <div class="kv"><span class="muted">Oldest account</span><strong>153d</strong> <span class="muted">– Great!</span></div>
+            <div class="kv"><span class="muted">Oldest account</span><strong>170d</strong> <span class="muted">– Great!</span></div>
             <div class="kv"><span class="muted">Credit checks</span><strong>3</strong> <span class="muted">– Great!</span></div>
-            <div class="kv"><span class="muted">Available credit</span><strong>$1,231.75 / $1,300</strong></div>
+            <div class="kv"><span class="muted">Available credit</span><strong>$1,158.90 / $1,300</strong></div>
           </div>
         </div>
       </div>
@@ -367,25 +367,25 @@
 
   <div id="report-modal" class="modal">
     <button id="close-report" class="close-btn">×</button>
-    <h2>Credit Report (as of Sep 7, 2025)</h2>
+    <h2>Credit Report (as of Sep 24, 2025)</h2>
 
     <div class="accord-item">
       <button class="accord-btn">2 open accounts</button>
       <div class="accord-panel">
         <div class="sub">Revolving accounts</div>
-        <div class="kv"><span class="muted">Total balances</span><strong>$68.25</strong></div>
-        <div class="kv"><span class="muted">Total credit</span><strong>$581.75</strong></div>
+        <div class="kv"><span class="muted">Total balances</span><strong>$87.75</strong></div>
+        <div class="kv"><span class="muted">Total credit</span><strong>$562.25</strong></div>
         <div style="margin-top:10px;">
-          <div><strong>CREDIT CARD - ****7295</strong> – $68.25 – Opened on Apr 7, 2025</div>
-          <div style="margin-top:6px;"><strong>CREDIT CARD - ****8126</strong> – $0.00 – Opened on Apr 13, 2025</div>
+          <div><strong>CREDIT CARD - ****7295</strong> – $57.54 – Opened on Apr 7, 2025</div>
+          <div style="margin-top:6px;"><strong>CREDIT CARD - ****8126</strong> – $30.21 – Opened on Apr 13, 2025</div>
         </div>
       </div>
     </div>
 
     <div class="accord-item">
-      <button class="accord-btn">0 installment accounts</button>
+      <button class="accord-btn">1 installment accounts</button>
       <div class="accord-panel">
-        <p class="muted">No installment accounts.</p>
+        <div style="margin:6px 0;"><strong class="muted">BUY NOW PAY LATER</strong> – CHSE PAYOVERTIME VYZB-XMQQ</div>
       </div>
     </div>
 
@@ -426,8 +426,8 @@
 
   <script>
     // ===== Score data (keep existing values) =====
-    const SCORE_VALUE = 756;
-    const SCORE_DELTA = +10; // "+12p"
+    const SCORE_VALUE = 764;
+    const SCORE_DELTA = +8; // "+12p"
 
     // ===== Gauge rendering =====
     const gauge = document.getElementById('gauge');
@@ -504,6 +504,7 @@
   </script>
 </body>
 </html>
+
 
 
 
